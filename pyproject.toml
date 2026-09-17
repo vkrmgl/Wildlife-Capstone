@@ -1,0 +1,18 @@
+[project]
+name = "capstone"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "esda>=2.10.0",
+    "folium>=0.20.0",
+    "geopandas>=1.1.4",
+    "h3>=4.5.0",
+    "jupyter>=1.1.1",
+    "libpysal>=4.15.0",
+    "mapclassify>=2.11.0",
+    "matplotlib>=3.11.2",
+    "pandas>=3.0.5",
+    "pyarrow>=25.0.1",
+]
