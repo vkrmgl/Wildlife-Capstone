@@ -9,6 +9,7 @@ wheels/
 # Virtual environments
 .venv
 
-# File formats
+# Data (kept local, never committed)
+data/
 *.csv
 *.parquet
