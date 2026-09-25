@@ -13,3 +13,9 @@ wheels/
 data/
 *.csv
 *.parquet
+
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Small summary tables in results/ are tracked
+!results/*.csv

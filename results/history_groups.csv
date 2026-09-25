@@ -1,0 +1,13 @@
+group,segments,miles,future_collisions,mean_B1_percentile,share_of_miles,share_of_future_collisions,future_rate_per_mile_year,fold
+nonzero Q1,950,950.0,1038,0.519,0.1295,0.0553,0.3642,validation
+nonzero Q2,950,938.31,1379,0.4879,0.1279,0.0734,0.4899,validation
+nonzero Q3,950,931.25,2310,0.573,0.1269,0.123,0.8268,validation
+nonzero Q4,950,923.74,3808,0.6379,0.1259,0.2028,1.3741,validation
+nonzero Q5,950,918.48,9070,0.697,0.1252,0.483,3.2917,validation
+zero history,2823,2675.93,1174,0.3606,0.3647,0.0625,0.1462,validation
+nonzero Q1,948,948.0,1419,0.5042,0.1292,0.0561,0.2994,test
+nonzero Q2,947,936.91,1832,0.4855,0.1277,0.0724,0.3911,test
+nonzero Q3,948,925.73,3075,0.5874,0.1262,0.1215,0.6643,test
+nonzero Q4,947,927.31,4980,0.6385,0.1264,0.1967,1.0741,test
+nonzero Q5,948,909.5,12291,0.7136,0.1239,0.4855,2.7028,test
+zero history,2835,2690.26,1719,0.3567,0.3666,0.0679,0.1278,test
