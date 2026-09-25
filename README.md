@@ -22,8 +22,8 @@ All from open ODOT ArcGIS layers (downloaded 2026-09-24):
 - Oregon state highways are split into 7,573 one-mile segments (7,338 miles).
   98.4% of deer and elk records are assigned to a segment.
 - **B0** ranks segments by collisions per mile per year in the four years before the cutoff.
-- **B1** is a negative binomial model of collision counts with log AADT, truck share,
-  posted speed, lanes, and divided share, and segment length as the offset.
+- **B1** is a binomial model of collision counts with log AADT, truck share,
+  posted speed, lanes, and divided share, offset by segment length.
 - Temporal evaluation: history through 2020, test period 2021-2025 (validation:
   history through 2017, target 2018-2020).
 - The main metric is **capture@K**: the share of test-period collisions on the
