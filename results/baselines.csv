@@ -1,0 +1,9 @@
+fold,model,features,history,capture_at_1,capture_at_5,capture_at_10,spearman
+test,B0,"collisions per mile-year, 4-year history",yes,0.0983,0.2823,0.4283,0.7229
+test,B1,"log AADT, truck %, posted speed, lanes, divided share",no,0.0146,0.0723,0.1703,0.4419
+test,Ceiling,actual target-window rate,n/a,0.1139,0.33,0.4922,1.0
+test,Random,none (expected value),no,0.01,0.05,0.1,0.0
+validation,B0,"collisions per mile-year, 4-year history",yes,0.0877,0.2744,0.4225,0.6998
+validation,B1,"log AADT, truck %, posted speed, lanes, divided share",no,0.0191,0.0866,0.1901,0.4512
+validation,Ceiling,actual target-window rate,n/a,0.1156,0.3362,0.5035,1.0
+validation,Random,none (expected value),no,0.01,0.05,0.1,0.0

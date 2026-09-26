@@ -1,0 +1,10 @@
+metric,value
+raw_records,104528.0
+dropped_species,10390.0
+deer_elk_records,94138.0
+invalid_location,0.0
+non_mainline_roadway,1527.0
+off_network_milepost,2.0
+assigned,92609.0
+unassigned,1529.0
+assignment_rate,0.9838
