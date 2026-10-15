@@ -1,0 +1,70 @@
+column,source,source_description,column_description
+segment_id,ODOT state highways,ODOT's state highway network cut into one-mile pieces by milepost,Segment ID: highway number plus the starting milepost
+hwy,ODOT state highways,ODOT's state highway network cut into one-mile pieces by milepost,ODOT highway number
+mkey,ODOT state highways,ODOT's state highway network cut into one-mile pieces by milepost,Mileage key. 00 is normal mileage; Z1 to Z7 mark stretches where mileposts repeat
+mile,ODOT state highways,ODOT's state highway network cut into one-mile pieces by milepost,Starting milepost of the segment
+begin_mp,ODOT state highways,ODOT's state highway network cut into one-mile pieces by milepost,First milepost covered by road in this segment
+end_mp,ODOT state highways,ODOT's state highway network cut into one-mile pieces by milepost,Last milepost covered by road in this segment
+length_mi,ODOT state highways,ODOT's state highway network cut into one-mile pieces by milepost,Miles of road in the segment. Under 1 at highway ends and gaps
+is_short,ODOT state highways,ODOT's state highway network cut into one-mile pieces by milepost,True if the segment is under a quarter mile
+lat,ODOT state highways,ODOT's state highway network cut into one-mile pieces by milepost,Latitude of the segment midpoint
+lon,ODOT state highways,ODOT's state highway network cut into one-mile pieces by milepost,Longitude of the segment midpoint
+coll_all_2015_2020,ODOT animal incidents,Carcass pickups logged by ODOT crews with species and milepost,Animals of any type hit on this segment in 2015 to 2020
+coll_all_2015_2020_per_yr,ODOT animal incidents,Carcass pickups logged by ODOT crews with species and milepost,Same count divided by 6 years
+coll_deer_elk_2015_2020,ODOT animal incidents,Carcass pickups logged by ODOT crews with species and milepost,Deer and elk hit on this segment in 2015 to 2020
+coll_deer_elk_2015_2020_per_yr,ODOT animal incidents,Carcass pickups logged by ODOT crews with species and milepost,Same count divided by 6 years
+coll_all_2021_2025,ODOT animal incidents,Carcass pickups logged by ODOT crews with species and milepost,Animals of any type hit on this segment in 2021 to 2025
+coll_all_2021_2025_per_yr,ODOT animal incidents,Carcass pickups logged by ODOT crews with species and milepost,Same count divided by 5 years
+coll_deer_elk_2021_2025,ODOT animal incidents,Carcass pickups logged by ODOT crews with species and milepost,Deer and elk hit on this segment in 2021 to 2025
+coll_deer_elk_2021_2025_per_yr,ODOT animal incidents,Carcass pickups logged by ODOT crews with species and milepost,Same count divided by 5 years
+panel_coverage,Panel grid transfer,Values carried over from master_panel.parquet through its 800 m grid cells,Share of the segment lying on grid cells that have panel data
+panel_borrow_m,Panel grid transfer,Values carried over from master_panel.parquet through its 800 m grid cells,Distance in meters to the cell borrowed when the segment crossed none with data. 0 if nothing was borrowed
+elevation_mean_m,USGS 3DEP via panel,National 30 m elevation model,Average elevation in meters
+elevation_min_m,USGS 3DEP via panel,National 30 m elevation model,Lowest elevation in meters
+elevation_max_m,USGS 3DEP via panel,National 30 m elevation model,Highest elevation in meters
+slope_mean_deg,USGS 3DEP via panel,National 30 m elevation model,Average ground slope in degrees
+slope_max_deg,USGS 3DEP via panel,National 30 m elevation model,Steepest ground slope in degrees
+pop_density_per_km2,Census tracts via panel,Census tract boundaries with population,People per square kilometer in the surrounding census tract
+ppt_month_mean_mm,PRISM via panel,Monthly rain and snow totals on a 4 km grid 2015 to 2025,Average monthly precipitation in millimeters
+ppt_month_min_mm,PRISM via panel,Monthly rain and snow totals on a 4 km grid 2015 to 2025,Driest month's precipitation
+ppt_month_max_mm,PRISM via panel,Monthly rain and snow totals on a 4 km grid 2015 to 2025,Wettest month's precipitation
+ppt_annual_mm,PRISM via panel,Monthly rain and snow totals on a 4 km grid 2015 to 2025,Average yearly precipitation
+tmean_c,PRISM via panel,Monthly average temperature on a 4 km grid 2015 to 2025,Average temperature in Celsius
+tmean_month_min_c,PRISM via panel,Monthly average temperature on a 4 km grid 2015 to 2025,Coldest month's average temperature
+tmean_month_max_c,PRISM via panel,Monthly average temperature on a 4 km grid 2015 to 2025,Warmest month's average temperature
+tmean_winter_c,PRISM via panel,Monthly average temperature on a 4 km grid 2015 to 2025,Average temperature December to February
+ppt_winter_month_mm,PRISM via panel,Monthly rain and snow totals on a 4 km grid 2015 to 2025,Average monthly precipitation December to February
+tmean_summer_c,PRISM via panel,Monthly average temperature on a 4 km grid 2015 to 2025,Average temperature June to August
+ppt_summer_month_mm,PRISM via panel,Monthly rain and snow totals on a 4 km grid 2015 to 2025,Average monthly precipitation June to August
+weather_months,PRISM via panel,Monthly rain and snow totals on a 4 km grid 2015 to 2025,Number of months behind the climate columns (132 when complete)
+hpms_coverage,FHWA HPMS,Road inventory every state submits to the federal government. Oregon's road IDs are ODOT mileposts,Share of the segment covered by an HPMS road section
+hpms_aadt,FHWA HPMS,Road inventory every state submits to the federal government. Oregon's road IDs are ODOT mileposts,Average daily traffic (vehicles per day)
+hpms_log_aadt,FHWA HPMS,Road inventory every state submits to the federal government. Oregon's road IDs are ODOT mileposts,Natural log of hpms_aadt
+hpms_truck_share,FHWA HPMS,Road inventory every state submits to the federal government. Oregon's road IDs are ODOT mileposts,Share of daily traffic that is trucks
+hpms_lanes,FHWA HPMS,Road inventory every state submits to the federal government. Oregon's road IDs are ODOT mileposts,Number of through lanes
+hpms_speed_limit,FHWA HPMS,Road inventory every state submits to the federal government. Oregon's road IDs are ODOT mileposts,Posted speed limit in mph
+hpms_rural_share,FHWA HPMS,Road inventory every state submits to the federal government. Oregon's road IDs are ODOT mileposts,Share of the segment outside an urban area (1 is fully rural)
+hpms_f_system,FHWA HPMS,Road inventory every state submits to the federal government. Oregon's road IDs are ODOT mileposts,Federal road class code. 1 interstate to 7 local
+hpms_functional_class,FHWA HPMS,Road inventory every state submits to the federal government. Oregon's road IDs are ODOT mileposts,Name of the road class code
+hpms_access_control,FHWA HPMS,Road inventory every state submits to the federal government. Oregon's road IDs are ODOT mileposts,How restricted access is. 1 full (ramps only) 2 partial 3 none
+nlcd_water,USGS NLCD 2024,National 30 m land cover map,Share of land within 200 m that is water or ice
+nlcd_developed,USGS NLCD 2024,National 30 m land cover map,Share that is built up. Includes the road itself so rarely below 0.1
+nlcd_barren,USGS NLCD 2024,National 30 m land cover map,Share that is bare rock or sand
+nlcd_forest,USGS NLCD 2024,National 30 m land cover map,Share that is forest
+nlcd_shrub,USGS NLCD 2024,National 30 m land cover map,Share that is shrubland
+nlcd_grass,USGS NLCD 2024,National 30 m land cover map,Share that is grassland
+nlcd_agriculture,USGS NLCD 2024,National 30 m land cover map,Share that is cropland or pasture
+nlcd_wetland,USGS NLCD 2024,National 30 m land cover map,Share that is wetland
+nlcd_dominant,USGS NLCD 2024,National 30 m land cover map,Land cover type with the largest share
+nlcd_pixels,USGS NLCD 2024,National 30 m land cover map,Number of map pixels counted
+gbif_deer,GBIF,Public wildlife sightings from citizen science and museum records. eBird excluded,Deer sightings within 5 km (mule deer and white-tailed deer)
+gbif_elk,GBIF,Public wildlife sightings from citizen science and museum records. eBird excluded,Elk sightings within 5 km
+gbif_bear,GBIF,Public wildlife sightings from citizen science and museum records. eBird excluded,Black bear sightings within 5 km
+gbif_cougar,GBIF,Public wildlife sightings from citizen science and museum records. eBird excluded,Cougar sightings within 5 km
+gbif_antelope,GBIF,Public wildlife sightings from citizen science and museum records. eBird excluded,Pronghorn sightings within 5 km
+gbif_mt_goat,GBIF,Public wildlife sightings from citizen science and museum records. eBird excluded,Mountain goat sightings within 5 km
+gbif_bighorn_sheep,GBIF,Public wildlife sightings from citizen science and museum records. eBird excluded,Bighorn sheep sightings within 5 km
+gbif_owl,GBIF,Public wildlife sightings from citizen science and museum records. eBird excluded,Owl sightings within 5 km (any owl species)
+gbif_hawk,GBIF,Public wildlife sightings from citizen science and museum records. eBird excluded,Hawk and eagle family sightings within 5 km
+gbif_bald_eagle,GBIF,Public wildlife sightings from citizen science and museum records. eBird excluded,Bald eagle sightings within 5 km
+gbif_golden_eagle,GBIF,Public wildlife sightings from citizen science and museum records. eBird excluded,Golden eagle sightings within 5 km

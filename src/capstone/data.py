@@ -74,14 +74,14 @@ def esri_to_shapely(geom):
     return LineString(paths[0]) if len(paths) == 1 else MultiLineString(paths)
 
 
-def download_layer(url, geometry=False):
-    """Page through a layer ordered by OBJECTID. Returns (frame, server count);
-    the frame is a GeoDataFrame in EPSG:4326 when geometry=True."""
+def download_layer(url, geometry=False, where="1=1", id_field="OBJECTID", out_fields="*"):
+    """Page through a layer ordered by its id field. Returns (frame, server
+    count); the frame is a GeoDataFrame in EPSG:4326 when geometry=True."""
     page_size = min(int(get_json(url, {"f": "json"}).get("maxRecordCount") or 1000), 2000)
-    total = int(get_json(f"{url}/query", {"where": "1=1", "returnCountOnly": "true", "f": "json"})["count"])
+    total = int(get_json(f"{url}/query", {"where": where, "returnCountOnly": "true", "f": "json"})["count"])
     rows, geoms = [], []
     for _ in range(math.ceil(total / page_size) + 5):
-        params = {"where": "1=1", "outFields": "*", "orderByFields": "OBJECTID", "f": "json",
+        params = {"where": where, "outFields": out_fields, "orderByFields": id_field, "f": "json",
                   "resultOffset": len(rows), "resultRecordCount": page_size,
                   "returnGeometry": str(geometry).lower()}
         if geometry:
@@ -95,19 +95,19 @@ def download_layer(url, geometry=False):
         time.sleep(0.25)
     print()
     df = pd.DataFrame(rows)
-    if df["OBJECTID"].duplicated().any():
-        raise RuntimeError(f"{url}: duplicate OBJECTIDs from paging")
+    if df[id_field].duplicated().any():
+        raise RuntimeError(f"{url}: duplicate {id_field}s from paging")
     if geometry:
         df = gpd.GeoDataFrame(df, geometry=geoms, crs="EPSG:4326")
     return df, total
 
 
-def record_download(name, path, rows, server_count):
+def record_download(name, path, rows, server_count, source=None):
     """Log source, row counts, date, and checksum in data/raw/manifest.json."""
     manifest_path = RAW / "manifest.json"
     manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
     manifest[name] = {
-        "source": LAYERS[name],
+        "source": source or LAYERS[name],
         "rows": rows,
         "server_count": server_count,
         "downloaded_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),

@@ -43,6 +43,26 @@ the ceiling. B1 ranks corridors better than random but does not separate miles w
 a highway well. AADT, speed, and lanes are current snapshots, so B1 is a spatial
 ranking with present-day road attributes. See [docs/methods.md](docs/methods.md).
 
+## Per-segment table with national covariates
+
+`data/processed/master_panel.parquet` (from `notebooks/wvc_capstone_pipeline.ipynb`)
+is a segment x month panel on half-mile OR-Trans segments with weather, terrain,
+population, habitat, connectivity, and traffic joined in. `scripts/build_segment_table.py`
+collapses it to one row per one-mile segment and keeps only covariates with a
+national source, so the same table can be built for any state:
+
+- terrain, population, and climate summaries carried over from the panel through
+  its 800 m grid cells;
+- traffic, lanes, speed limit, functional class, and rural/urban from FHWA HPMS,
+  joined by milepost;
+- land cover shares from USGS Annual NLCD;
+- GBIF occurrence counts within 5 km for each animal type in the ODOT records;
+- collision counts for all animals and for deer/elk, 2015-2020 and 2021-2025.
+
+Output: `data/processed/or_segment_table.parquet`. Columns and sources are in
+[docs/segment_table.md](docs/segment_table.md); coverage in
+`results/segment_table_coverage.csv`.
+
 ## Reproduce
 
 Requires [uv](https://docs.astral.sh/uv/).
@@ -53,10 +73,13 @@ uv run python scripts/download_data.py   # ODOT layers -> data/raw/
 uv run python scripts/build_dataset.py   # segments, assignment, features -> data/processed/
 uv run python scripts/run_models.py      # B0, B1 -> results/
 uv run python scripts/diagnostics.py     # B0 vs B1 diagnostics -> results/
+uv run python scripts/download_national_sources.py  # HPMS, NLCD (1.4 GB), GBIF -> data/raw/
+uv run python scripts/build_segment_table.py        # per-segment table -> data/processed/
 uv run pytest
 ```
 
-`data/` is not tracked. Result tables in `results/` are small and tracked.
+`data/` is not tracked except `master_panel.parquet`. Result tables in `results/`
+are small and tracked.
 
 `notebooks/EDA.ipynb` is an exploratory analysis of Idaho roadkill records (IDFG),
 which is not yet part of the modeling pipeline.

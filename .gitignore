@@ -9,10 +9,13 @@ wheels/
 # Virtual environments
 .venv
 
-# Data (kept local, never committed)
-data/
+# Data (kept local, never committed), except the data dictionary
+data/**
+!data/processed/
+!data/processed/or_segment_table_dictionary.csv
 *.csv
 *.parquet
+!data/processed/or_segment_table_dictionary.csv
 
 .pytest_cache/
 .ipynb_checkpoints/
