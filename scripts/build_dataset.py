@@ -1,7 +1,7 @@
 """Build segments, assign collisions, and join traffic features.
 
-Writes data/processed/or_segments.parquet, or_collisions_assigned.parquet,
-or_traffic_features.parquet, and results/conservation.csv and
+Writes data/processed/odot_segments.parquet, odot_collisions_assigned.parquet,
+odot_traffic_features.parquet, and results/conservation.csv and
 results/traffic_coverage.csv.
 
 Usage: uv run python scripts/build_dataset.py
@@ -18,21 +18,21 @@ PROCESSED.mkdir(parents=True, exist_ok=True)
 
 highways = gpd.read_parquet(RAW / "odot_state_highways.parquet")
 seg = build_segments(mainline_pieces(highways))
-seg.to_parquet(PROCESSED / "or_segments.parquet", index=False)
+seg.to_parquet(PROCESSED / "odot_segments.parquet", index=False)
 print(f"{len(seg):,} segments, {seg['length_mi'].sum():,.1f} miles, {int(seg['is_short'].sum())} under 0.25 mi")
 
 raw = pd.read_parquet(RAW / "odot_wildlife_collisions.parquet")
 assigned = assign_collisions(prepare_collisions(raw), seg)
 cols = ["OBJECTID", "ANIMAL", "DATE", "year", "LRM_KEY", "hwy", "sfx", "direction", "mkey", "mp",
         "LAT", "LONGTD", "is_target_species", "status", "segment_id"]
-assigned[cols].to_parquet(PROCESSED / "or_collisions_assigned.parquet", index=False)
+assigned[cols].to_parquet(PROCESSED / "odot_collisions_assigned.parquet", index=False)
 report = conservation_report(assigned)
 pd.Series(report, name="value").rename_axis("metric").to_csv(RESULTS / "conservation.csv")
 print(report)
 
 tf = traffic_features(seg, pd.read_parquet(RAW / "odot_aadt.parquet"), pd.read_parquet(RAW / "odot_posted_speed.parquet"),
                       pd.read_parquet(RAW / "odot_lanes.parquet"), highways)
-tf.to_parquet(PROCESSED / "or_traffic_features.parquet", index=False)
+tf.to_parquet(PROCESSED / "odot_traffic_features.parquet", index=False)
 
 coverage = {
     "segments": len(tf),

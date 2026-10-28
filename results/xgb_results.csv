@@ -1,0 +1,15 @@
+model,trained_on,tested_on,capture_at_1,capture_at_5,capture_at_10,spearman
+B0 history rate,OR,OR,0.0969,0.2858,0.4326,0.7452
+ceiling,OR,OR,0.115,0.3313,0.4936,1.0
+random,OR,OR,0.01,0.05,0.1,0.0
+B0 history rate,ID,ID,0.076,0.242,0.3847,0.5479
+ceiling,ID,ID,0.1277,0.3728,0.5476,1.0
+random,ID,ID,0.01,0.05,0.1,0.0
+XGB covariates,OR,OR,0.0878,0.2771,0.4175,0.7426
+XGB covariates,ID,ID,0.0721,0.2302,0.3638,0.5801
+XGB covariates,OR,ID,0.0265,0.1248,0.2218,0.4006
+XGB covariates,ID,OR,0.0344,0.1299,0.2165,0.4754
+XGB covariates,OR+ID,OR,0.0883,0.2729,0.4138,0.7392
+XGB covariates,OR+ID,ID,0.0701,0.2108,0.3397,0.5412
+XGB covariates + history,OR,OR,0.0976,0.2881,0.4356,0.767
+XGB covariates + history,ID,ID,0.0727,0.2436,0.3923,0.5771

@@ -9,16 +9,18 @@ wheels/
 # Virtual environments
 .venv
 
-# Data (kept local, never committed), except the data dictionary
+# Data is kept local and rebuilt with the scripts, except the data
+# dictionaries (and master_panel.parquet, which was committed earlier)
 data/**
 !data/processed/
-!data/processed/or_segment_table_dictionary.csv
+!data/processed/*_segment_table_dictionary.csv
 *.csv
 *.parquet
-!data/processed/or_segment_table_dictionary.csv
+!data/processed/*_segment_table_dictionary.csv
 
 .pytest_cache/
 .ipynb_checkpoints/
+.DS_Store
 
 # Small summary tables in results/ are tracked
 !results/*.csv

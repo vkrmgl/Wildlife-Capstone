@@ -5,7 +5,7 @@ for validation, 2015-2020 for test. The ceiling ranks by the actual target
 rate and is a reference line only.
 
 Writes results/model_results.csv, baselines.csv, b1_coefficients.csv, and
-data/processed/or_scores_{fold}.parquet (used by diagnostics.py).
+data/processed/odot_scores_{fold}.parquet (used by diagnostics.py).
 
 Usage: uv run python scripts/run_models.py
 """
@@ -22,9 +22,9 @@ FOLDS = {"validation": (2014, 2017, 2018, 2020), "test": (2017, 2020, 2021, 2025
 B1_FIT_WINDOWS = {"validation": (2015, 2017), "test": (2015, 2020)}
 FIRST_FULL_YEAR = 2010  # records start in August 2009
 
-seg = pd.read_parquet(PROCESSED / "or_segments.parquet", columns=["segment_id", "hwy", "length_mi"])
-assigned = pd.read_parquet(PROCESSED / "or_collisions_assigned.parquet")
-traffic = pd.read_parquet(PROCESSED / "or_traffic_features.parquet")
+seg = pd.read_parquet(PROCESSED / "odot_segments.parquet", columns=["segment_id", "hwy", "length_mi"])
+assigned = pd.read_parquet(PROCESSED / "odot_collisions_assigned.parquet")
+traffic = pd.read_parquet(PROCESSED / "odot_traffic_features.parquet")
 
 results, coefs = [], []
 for fold_name, window in FOLDS.items():
@@ -48,7 +48,7 @@ for fold_name, window in FOLDS.items():
         results.append({"fold": fold_name, "model": model, "history_start": start, "history_end": he,
                         "target_start": ts, "target_end": te, **evaluate(score, fold)})
         fold[f"score_{model}"] = score
-    fold.to_parquet(PROCESSED / f"or_scores_{fold_name}.parquet", index=False)
+    fold.to_parquet(PROCESSED / f"odot_scores_{fold_name}.parquet", index=False)
 
 results = pd.DataFrame(results)
 results.to_csv(RESULTS / "model_results.csv", index=False)

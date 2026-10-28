@@ -25,10 +25,10 @@ def top_miles(score, miles, k):
     return mask
 
 
-seg = pd.read_parquet(PROCESSED / "or_segments.parquet", columns=["segment_id", "hwy"])
+seg = pd.read_parquet(PROCESSED / "odot_segments.parquet", columns=["segment_id", "hwy"])
 metrics, groups = [], []
 for fold_name in ("validation", "test"):
-    t = pd.read_parquet(PROCESSED / f"or_scores_{fold_name}.parquet").merge(seg, on="segment_id")
+    t = pd.read_parquet(PROCESSED / f"odot_scores_{fold_name}.parquet").merge(seg, on="segment_id")
     b0, b1 = t["score_B0_history_4yr"].to_numpy(), t["score_B1_traffic"].to_numpy()
     fut, mi, y = t["deer_elk_rate"].to_numpy(), t["length_mi"].to_numpy(), t["deer_elk_count"].to_numpy()
     years = t["target_years"].iloc[0]

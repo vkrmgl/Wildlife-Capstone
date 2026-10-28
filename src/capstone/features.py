@@ -57,11 +57,13 @@ def interval_layer(layer, value_cols, roadway="1"):
     return out[out["end"] - out["begin"] > 1e-9]
 
 
-def interval_join(segments, intervals, value_cols):
+def interval_join(segments, intervals, value_cols, keys=("hwy", "mkey")):
     """Length-weighted mean of each value over the intervals overlapping each
     segment (intervals can cross segment boundaries), plus covered_mi. One row
-    per segment; segments with no overlap get NaN and covered_mi 0."""
-    j = segments[["segment_id", "hwy", "mkey", "begin_mp", "end_mp"]].merge(intervals, on=["hwy", "mkey"])
+    per segment; segments with no overlap get NaN and covered_mi 0. `keys`
+    are the route columns shared by segments and intervals."""
+    keys = list(keys)
+    j = segments[["segment_id", *keys, "begin_mp", "end_mp"]].merge(intervals, on=keys)
     j["overlap"] = np.minimum(j["end_mp"], j["end"]) - np.maximum(j["begin_mp"], j["begin"])
     j = j[j["overlap"] > 1e-9]
     out = pd.DataFrame({"segment_id": segments["segment_id"].values})

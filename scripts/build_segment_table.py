@@ -1,78 +1,102 @@
-"""Build the per-segment modeling table with nationally available covariates.
+"""Build the per-segment modeling table for each state from the sources in
+data/raw/ (see download_sources.py).
 
-Reads data/processed/master_panel.parquet (the segment x month panel), the
-one-mile segments and assigned collisions from build_dataset.py, and the
-sources from download_national_sources.py. Writes
-data/processed/or_segment_table.parquet (one row per one-mile segment),
-data/processed/or_segment_year_counts.parquet (collisions per segment, year,
-and animal), and results/segment_table_coverage.csv.
+Writes, per state (prefix = lower-case state code):
+  data/processed/{st}_segments.parquet              one-mile segments with geometry
+  data/processed/{st}_collisions_assigned.parquet   every collision record with its segment
+  data/processed/{st}_segment_year_counts.parquet   assigned records per segment, year, species group
+  data/processed/{st}_segment_table.parquet         one row per segment: target windows and covariates
+  data/processed/{st}_segment_table_dictionary.csv  column descriptions (tracked)
+  results/{st}_segment_table_coverage.csv           coverage and conservation checks (tracked)
 
-Usage: uv run python scripts/build_segment_table.py
+Usage: uv run python scripts/build_segment_table.py [OR ID ...]   (default: all states)
 """
 
+import sys
+
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 
-from capstone.data import PROCESSED, RAW, RESULTS, TARGET_SPECIES, assign_collisions, prepare_collisions
-from capstone.national import (GBIF_TAXA, TEST_YEARS, TRAIN_YEARS, assemble, collision_windows, collision_years,
-                               cover_segments, gbif_counts, hpms_features, nlcd_shares, panel_by_cell,
-                               segment_base, segment_cells, transfer_static, transfer_weather)
+from capstone.climate import climate_summaries, monthly_means
+from capstone.collisions import (assign_collisions, collision_windows, collision_years, conservation_report,
+                                 prepare_collisions)
+from capstone.data import PROCESSED, RESULTS
+from capstone.gbif import GBIF_TAXA, gbif_counts, gbif_path
+from capstone.landcover import nlcd_path, nlcd_shares
+from capstone.network import build_segments, geometry_check, hpms_features, hpms_path, mainline_sections, orient_sections
+from capstone.population import population_features, tract_density
+from capstone.states import STATES, get_state
+from capstone.table import assemble, check_dictionary, dictionary, segment_base
+from capstone.terrain import terrain_features
 
-seg = gpd.read_parquet(PROCESSED / "or_segments.parquet")
-print(f"{len(seg):,} one-mile segments")
+PROCESSED.mkdir(parents=True, exist_ok=True)
+RESULTS.mkdir(parents=True, exist_ok=True)
+states = [get_state(c) for c in sys.argv[1:]] or list(STATES.values())
 
-# --- Target: every animal type assigned by milepost, like build_dataset.py but
-# without the deer/elk filter.
-raw = pd.read_parquet(RAW / "odot_wildlife_collisions.parquet")
-prepared = prepare_collisions(raw).assign(is_target_species=True)
-assigned = assign_collisions(prepared, seg)
-n_ok = int((assigned["status"] == "assigned").sum())
-print(f"collisions: {n_ok:,} / {len(assigned):,} records assigned to a segment")
-collision_years(assigned).to_parquet(PROCESSED / "or_segment_year_counts.parquet", index=False)
-target = collision_windows(assigned, seg, TARGET_SPECIES, [TRAIN_YEARS, TEST_YEARS])
+for state in states:
+    st = state.code.lower()
+    print(f"\n== {state.name}")
 
-# --- Terrain, population, climate from the panel via its grid cells --------
-panel = pd.read_parquet(PROCESSED / "master_panel.parquet",
-                        columns=["segment_id", "grid_id", "year", "month", "ppt_mean", "tmean_mean",
-                                 "elevation_mean_m", "elevation_min_m", "elevation_max_m",
-                                 "slope_mean_deg", "slope_max_deg", "pop_density_per_km2"])
-static, weather = panel_by_cell(panel)
-print(f"panel: {panel['segment_id'].nunique():,} segments in {len(static):,} grid cells")
-cells, coverage = cover_segments(segment_cells(seg), seg, static["grid_id"])
-terrain = transfer_static(cells, static)
-climate = transfer_weather(cells, weather)
-print(f"  {int((coverage['panel_coverage'] > 0).sum()):,} segments cross panel cells, "
-      f"{int((coverage['panel_borrow_m'] > 0).sum())} borrow the nearest cell")
+    # --- Segments from HPMS mainline sections ---------------------------------
+    hpms = gpd.read_parquet(hpms_path(state))
+    sections = orient_sections(mainline_sections(hpms, state))
+    ratio = geometry_check(sections)
+    seg = build_segments(sections, state)
+    seg.to_parquet(PROCESSED / f"{st}_segments.parquet", index=False)
+    print(f"segments: {len(seg):,} on {seg['route_id'].nunique()} routes, {seg['length_mi'].sum():,.1f} miles, "
+          f"{int(seg['is_short'].sum())} under 0.25 mi; drawn/milepost length ratio median {np.median(ratio):.3f}")
 
-# --- HPMS, NLCD, GBIF -------------------------------------------------------
-hpms = hpms_features(seg, pd.read_parquet(RAW / "hpms_or_2024.parquet"))
-print(f"HPMS: {100 * (hpms['hpms_coverage'] > 0).mean():.1f}% of segments covered, "
-      f"{100 * hpms['hpms_aadt'].notna().mean():.1f}% with AADT")
-nlcd = nlcd_shares(seg, RAW / "nlcd" / "nlcd_2024_or.tif")
-print(f"NLCD: dominant group counts\n{nlcd['nlcd_dominant'].value_counts().to_string()}")
-records = {name: pd.read_parquet(RAW / "gbif" / f"gbif_{name}.parquet") for name, _, _ in GBIF_TAXA.values()}
-gbif = gbif_counts(seg, records)
-print("GBIF: records within radius, mean per segment\n"
-      + gbif.drop(columns="segment_id").mean().round(1).to_string())
+    # --- Target -----------------------------------------------------------------
+    records = prepare_collisions(state, seg)
+    assigned = assign_collisions(records, seg, state)
+    assigned.to_parquet(PROCESSED / f"{st}_collisions_assigned.parquet", index=False)
+    report = conservation_report(assigned)
+    print(f"collisions: {report['assigned']:,} / {report['raw_records']:,} records assigned "
+          f"({report['assigned_milepost']:,} by milepost, {report['assigned_coordinates']:,} by coordinates)")
+    collision_years(assigned).to_parquet(PROCESSED / f"{st}_segment_year_counts.parquet", index=False)
+    target = collision_windows(assigned, seg)
 
-table = assemble([segment_base(seg), target, coverage, terrain, climate, hpms, nlcd, gbif])
-table.to_parquet(PROCESSED / "or_segment_table.parquet", index=False)
-print(f"\nwrote or_segment_table.parquet: {len(table):,} rows x {len(table.columns)} columns")
+    # --- Covariates -------------------------------------------------------------
+    terrain = terrain_features(seg)
+    print(f"terrain: {100 * (terrain['terrain_pixels'] > 0).mean():.1f}% of segments with DEM pixels")
+    monthly = monthly_means(seg)
+    climate = climate_summaries(monthly)
+    print(f"climate: {monthly.groupby('segment_id').size().max()} months per segment")
+    population = population_features(seg, tract_density(state))
+    print(f"population: {100 * population['pop_density_per_km2'].notna().mean():.1f}% of segments with a tract")
+    traffic = hpms_features(seg, sections)
+    print(f"HPMS: {100 * traffic['hpms_aadt'].notna().mean():.1f}% of segments with AADT, "
+          f"{100 * traffic['hpms_speed_limit'].notna().mean():.1f}% with a speed limit")
+    landcover = nlcd_shares(seg, nlcd_path(state))
+    print(f"NLCD: dominant groups {landcover['nlcd_dominant'].value_counts().to_dict()}")
+    records_by_group = {g: pd.read_parquet(gbif_path(state, g)) for g in GBIF_TAXA}
+    gbif = gbif_counts(seg, records_by_group)
+    print("GBIF: mean records within 5 km " + ", ".join(f"{c[5:]} {v:.0f}" for c, v in gbif.drop(columns='segment_id').mean().items()))
 
-cov = {
-    "segments": len(table),
-    "collision_records": len(assigned),
-    "collision_records_assigned": n_ok,
-    "pct_segments_panel_covered": round(100 * (coverage["panel_coverage"] > 0).mean(), 2),
-    "segments_panel_borrowed": int((coverage["panel_borrow_m"] > 0).sum()),
-    "pct_segments_hpms_covered": round(100 * (hpms["hpms_coverage"] > 0).mean(), 2),
-    "pct_segments_hpms_aadt": round(100 * hpms["hpms_aadt"].notna().mean(), 2),
-    "pct_segments_hpms_speed_limit": round(100 * hpms["hpms_speed_limit"].notna().mean(), 2),
-    "pct_segments_nlcd": round(100 * (nlcd["nlcd_pixels"] > 0).mean(), 2),
-}
-for c in table.columns:
-    if c.startswith("gbif_"):
-        cov[f"{c}_records"] = int(len(records[c[5:]]))
-        cov[f"{c}_pct_segments_nonzero"] = round(100 * (table[c] > 0).mean(), 2)
-pd.Series(cov, name="value").rename_axis("metric").to_csv(RESULTS / "segment_table_coverage.csv")
-print(pd.Series(cov).to_string())
+    # --- Table, dictionary, coverage ---------------------------------------------
+    table = assemble([segment_base(seg, state), target, terrain, climate, population, traffic, landcover, gbif])
+    dic = dictionary(state)
+    check_dictionary(table, dic)
+    table.to_parquet(PROCESSED / f"{st}_segment_table.parquet", index=False)
+    dic.to_csv(PROCESSED / f"{st}_segment_table_dictionary.csv", index=False)
+    print(f"wrote {st}_segment_table.parquet: {len(table):,} rows x {len(table.columns)} columns")
+
+    cov = {
+        "segments": len(table),
+        "routes": int(seg["route_id"].nunique()),
+        "network_miles": round(float(seg["length_mi"].sum()), 1),
+        "pct_sections_drawn_within_10pct_of_milepost_length": round(100 * float(np.mean(np.abs(ratio - 1) <= 0.1)), 2),
+        **{f"collision_{k}": v for k, v in report.items()},
+        "collision_snap_m_median": round(float(assigned["snap_m"].median()), 1) if assigned["snap_m"].notna().any() else None,
+        "pct_segments_terrain": round(100 * (terrain["terrain_pixels"] > 0).mean(), 2),
+        "weather_months": int(climate["weather_months"].max()),
+        "pct_segments_population": round(100 * population["pop_density_per_km2"].notna().mean(), 2),
+        "pct_segments_hpms_aadt": round(100 * traffic["hpms_aadt"].notna().mean(), 2),
+        "pct_segments_hpms_speed_limit": round(100 * traffic["hpms_speed_limit"].notna().mean(), 2),
+        "pct_segments_nlcd": round(100 * (landcover["nlcd_pixels"] > 0).mean(), 2),
+    }
+    for g in GBIF_TAXA:
+        cov[f"gbif_{g}_records"] = int(len(records_by_group[g]))
+        cov[f"gbif_{g}_pct_segments_nonzero"] = round(100 * (table[f"gbif_{g}"] > 0).mean(), 2)
+    pd.Series(cov, name="value").rename_axis("metric").to_csv(RESULTS / f"{st}_segment_table_coverage.csv")
