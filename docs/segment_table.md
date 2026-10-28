@@ -30,6 +30,14 @@ most of it the 3DEP tiles (about 55 MB each, 54 for Oregon and 63 for Idaho)
 and the NLCD CONUS mosaic (1.4 GB, shared). Files already present are
 skipped, so an interrupted download can be rerun.
 
+The NLCD mosaic comes from the MRLC download server, which is unavailable
+(HTTP 503) at times for hours. The download is retried, then fails with the
+alternatives: the cropped `data/raw/nlcd/nlcd_2024_{st}.tif` files from a
+teammate (about 60 MB per state) make the mosaic unnecessary, the same zip is
+on [ScienceBase](https://www.sciencebase.gov/catalog/item/6810c1a4d4be022940554075)
+(Collection 1.1 Land Cover, browser download), and `CAPSTONE_NLCD_URL` points
+the script at another copy.
+
 ## Segments
 
 HPMS `route_id` is state-defined. Oregon submits ODOT's 8-character LRM_KEY

@@ -29,7 +29,8 @@ states = [get_state(c) for c in sys.argv[1:]] or list(STATES.values())
 
 print("== shared sources")
 download_states()
-nlcd_zip = download_nlcd()
+# The 1.4 GB mosaic is only needed to crop a state that has no crop yet.
+nlcd_zip = download_nlcd() if any(not nlcd_path(s).exists() for s in states) else None
 missing_months = []
 for var in VARIABLES:
     for year, month in months(CLIMATE_YEARS):

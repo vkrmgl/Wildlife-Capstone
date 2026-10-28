@@ -35,6 +35,8 @@ coverage and conservation in `results/{st}_segment_table_coverage.csv`.
 
 Requires [uv](https://docs.astral.sh/uv/). No API keys. The downloads are about 8 GB
 (mostly elevation tiles and the land cover mosaic) and are skipped when already present.
+If the NLCD download fails with HTTP 503, the MRLC server is down; the error lists
+alternatives (simplest: a teammate's `data/raw/nlcd/nlcd_2024_{st}.tif` files).
 
 ```bash
 uv sync
